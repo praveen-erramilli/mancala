@@ -23,10 +23,10 @@ public class GameInitializer {
         Mancala mancala0 = new Mancala(null, 0, pits.get(1).get(0), player0, null);
         //mancala1 next points to player0, pit0
         Mancala mancala1 = new Mancala(null, 0, pits.get(0).get(0), player1, null);
-        //player1, end pit next points to mancala0
-        pits.get(1).get(NUM_PITS-1).setNext(mancala0);
-        //player0, end pit next points to mancala1
-        pits.get(0).get(NUM_PITS-1).setNext(mancala1);
+        //player1, end pit next points to mancala1
+        pits.get(1).get(NUM_PITS-1).setNext(mancala1);
+        //player0, end pit next points to mancala0
+        pits.get(0).get(NUM_PITS-1).setNext(mancala0);
 
         Board board = new Board(null, pits.get(0), pits.get(1), mancala0, mancala1);
         mancala0.setBoard(board);

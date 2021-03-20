@@ -13,9 +13,13 @@ public class Mancala extends Pit {
         super(id, coinsCount, next, owner, null, board);
     }
 
+    public Mancala() {
+    }
+
     @Override
     public boolean canInsert(Game game) {
-        return game.getCurrentPlayer().equals(getOwner());
+        //When game is over, pick all coins and put in mancala
+        return game.getCurrentPlayer().equals(getOwner()) || game.getGameStatus().equals(GameStatus.GAMEOVER);
     }
 
     @Override

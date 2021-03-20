@@ -1,6 +1,8 @@
 package com.praveen.mancala.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,10 +10,12 @@ import javax.persistence.Id;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Player {
     @GeneratedValue
     @Id
-    private final Long id;
+    private Long id;
 
-    private final int playerNumber;
+    private int playerNumber;
 }

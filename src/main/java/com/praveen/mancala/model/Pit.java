@@ -9,6 +9,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Pit {
     @GeneratedValue
     @Id
@@ -55,6 +56,9 @@ public class Pit {
     }
 
     public boolean canPickCoins(Game game) {
+        if(game.getGameStatus().equals(GameStatus.GAMEOVER)) {
+            return true;    //When game is over, pick all coins and put in mancala
+        }
         if(coinsCount == 0) {
             return false;
         }
@@ -79,5 +83,16 @@ public class Pit {
         } else {
             throw new UnsupportedOperationException("User is not allowed to pick coins from this pit");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Pit{" +
+                "id=" + id +
+                ", coinsCount=" + coinsCount +
+                ", next=" + next.getId() +
+                ", owner=" + owner +
+                ", opposite=" + opposite.getId() +
+                '}';
     }
 }

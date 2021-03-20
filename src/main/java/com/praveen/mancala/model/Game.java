@@ -52,4 +52,18 @@ public class Game {
             setCurrentPlayer(player0);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "id=" + id +
+                ", player0=" + player0 +
+                ", player1=" + player1 +
+                ", gameStatus=" + gameStatus +
+                ", currentPlayer=" + currentPlayer +
+                ", winner=" + winner +
+                ", isTie=" + isTie +
+                ", lastInsertedPit=" + lastInsertedPit +
+                '}';
+    }
 }

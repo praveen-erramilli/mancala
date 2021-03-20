@@ -1,7 +1,9 @@
 package com.praveen.mancala.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -11,25 +13,27 @@ import static com.praveen.mancala.AppConstants.NUM_PITS;
 
 @Data
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Board {
 
     @Id
     @GeneratedValue
-    private final Long id;
+    private Long id;
 
     @OneToMany(targetEntity = Pit.class, mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
-    private final List<Pit> pits0;
+    private List<Pit> pits0;
 
     @OneToMany(targetEntity = Pit.class, mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
-    private final List<Pit> pits1;
+    private List<Pit> pits1;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private final Mancala mancala0;
+    private Mancala mancala0;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private final Mancala mancala1;
+    private Mancala mancala1;
 
     public Pit fetchPit(Long id) {
 
@@ -53,5 +57,12 @@ public class Board {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Board{" +
+                "id=" + id +
+                '}';
     }
 }

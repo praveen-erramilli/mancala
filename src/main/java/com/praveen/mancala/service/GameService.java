@@ -1,6 +1,7 @@
 package com.praveen.mancala.service;
 
 import com.praveen.mancala.cache.GameCache;
+import com.praveen.mancala.game.EmptyRowWatcher;
 import com.praveen.mancala.game.GameInitializer;
 import com.praveen.mancala.model.Game;
 import com.praveen.mancala.game.Picker;
@@ -37,6 +38,8 @@ public class GameService {
         Picker picker = new Picker(pitID, game);
         picker.runPicker();
 
+        EmptyRowWatcher emptyRowWatcher = new EmptyRowWatcher(game);
+        emptyRowWatcher.watchAndHandleEmptyRow();
 
         return gameCache.saveGame(game);
     }
