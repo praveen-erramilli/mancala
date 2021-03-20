@@ -1,6 +1,7 @@
 package com.praveen.mancala.service;
 
 import com.praveen.mancala.cache.GameCache;
+import com.praveen.mancala.exception.GameNotFoundException;
 import com.praveen.mancala.game.EmptyRowWatcher;
 import com.praveen.mancala.game.GameInitializer;
 import com.praveen.mancala.model.Game;
@@ -21,7 +22,7 @@ public class GameService {
 
     public Game getGame(Long id) {
         return gameCache.getGame(id).orElseThrow(() -> {
-            throw new IllegalArgumentException("Invalid argument passed for id. No such game found");
+            throw new GameNotFoundException("Invalid argument passed for id. No such game found");
         });
     }
 
