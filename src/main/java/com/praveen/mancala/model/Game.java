@@ -1,8 +1,10 @@
 package com.praveen.mancala.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 
@@ -18,26 +20,27 @@ public class Game {
     @OneToOne(cascade = CascadeType.ALL)
     private Board board;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Player player0;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Player player1;
 
     @Enumerated
     private GameStatus gameStatus;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Player currentPlayer;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Player winner;
 
     private boolean isTie;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Pit lastInsertedPit;
 
+    @JsonIgnore
     public Mancala getCurrentPlayerMancala() {
         if(currentPlayer.getPlayerNumber() == 0) {
             return board.getMancala0();
