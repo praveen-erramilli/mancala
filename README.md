@@ -39,3 +39,6 @@ This project is an implementation of Mancala game using Java.
 
 #### API Docs
 * Swagger API Docs can be accessed by opening http://localhost:8080/swagger-ui/# . This requires jar to be in running state.
+
+#### UI
+![UI](GameUI.png)
