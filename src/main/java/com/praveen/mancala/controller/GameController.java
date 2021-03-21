@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/game")
 public class GameController {
+    private final GameService gameService;
 
     @Autowired
-    private GameService gameService;
+    public GameController(GameService gameService) {
+        this.gameService = gameService;
+    }
 
     @GetMapping("/{id}")
     public Game getGame(@PathVariable(value = "id")  Long id) {
