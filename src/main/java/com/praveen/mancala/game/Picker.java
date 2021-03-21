@@ -34,8 +34,8 @@ public class Picker {
             System.out.println(pit.getId());
             pit.insertCoin(game);
             if(pickedCoins == 0) {
-                pit.onLastCoinInsert(game);
                 game.setLastInsertedPit(pit);
+                pit.onLastCoinInsert(game);
             }
         }
     }

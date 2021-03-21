@@ -49,10 +49,10 @@ public class Pit {
             throw new UnsupportedOperationException("User is not allowed to add coin in this Mancala");
         }
         if(coinsCount == 1 && game.getCurrentPlayer().equals(owner)) {
-            int totalPickedCoins = pickCoins(game) + opposite.pickCoins(game);
+            int totalPickedCoins = pickCoins(game) + (opposite.canPickCoins(game) ? opposite.pickCoins(game) : 0);
             game.getCurrentPlayerMancala().insertMultipleCoins(game, totalPickedCoins);
-            game.switchPlayer();
         }
+        game.switchPlayer();
     }
 
     public boolean canPickCoins(Game game) {
@@ -72,7 +72,7 @@ public class Pit {
     private boolean isLastInsertedInOppositeEmptyPit(Player currentPlayer, Pit lastInsertedPit) {
         return opposite.owner.equals(currentPlayer)
                 && opposite.equals(lastInsertedPit)
-                && opposite.coinsCount == 1;
+                && opposite.coinsCount == 0;
     }
 
     public int pickCoins(Game game) {

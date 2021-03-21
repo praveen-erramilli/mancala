@@ -34,7 +34,7 @@ public class Mancala extends Pit {
         if(!canInsert(game)) {
             throw new UnsupportedOperationException("User is not allowed to add coin in this Pit");
         }
-        super.setCoinsCount(count);
+        super.setCoinsCount(super.getCoinsCount() + count);
     }
 
     @Override
