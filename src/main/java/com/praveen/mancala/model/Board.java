@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.praveen.mancala.AppConstants.NUM_PITS;
 
@@ -23,10 +25,12 @@ public class Board {
 
     @OneToMany(targetEntity = Pit.class, mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
+    @Where(clause = "opposite_id IS NOT NULL AND player_number='0'")
     private List<Pit> pits0;
 
     @OneToMany(targetEntity = Pit.class, mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
+    @Where(clause = "opposite_id IS NOT NULL AND player_number='1'")
     private List<Pit> pits1;
 
     @OneToOne(cascade = CascadeType.ALL)

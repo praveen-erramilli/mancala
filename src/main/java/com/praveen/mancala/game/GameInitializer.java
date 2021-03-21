@@ -20,9 +20,9 @@ public class GameInitializer {
         List<List<Pit>> pits = initPits(player0, player1);
 
         //mancala0 next points to player1, pit0
-        Mancala mancala0 = new Mancala(null, 0, pits.get(1).get(0), player0, null);
+        Mancala mancala0 = new Mancala(null, 0, pits.get(1).get(0), player0,0, null);
         //mancala1 next points to player0, pit0
-        Mancala mancala1 = new Mancala(null, 0, pits.get(0).get(0), player1, null);
+        Mancala mancala1 = new Mancala(null, 0, pits.get(0).get(0), player1,1, null);
         //player1, end pit next points to mancala1
         pits.get(1).get(NUM_PITS-1).setNext(mancala1);
         //player0, end pit next points to mancala0
@@ -47,7 +47,7 @@ public class GameInitializer {
             Player player = i == 0 ? player0 : player1;
 
             for(int j=0; j < NUM_PITS; j ++) {
-                Pit pit = new Pit(null, PIT_INITIAL_COINS, null, player, null, null);
+                Pit pit = new Pit(null, PIT_INITIAL_COINS, null, player,i, null, null);
                 pits.get(i).add(j, pit);
             }
         }

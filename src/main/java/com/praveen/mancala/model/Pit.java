@@ -24,6 +24,8 @@ public class Pit {
     @OneToOne(cascade = CascadeType.ALL)
     private Player owner;
 
+    private int playerNumber;
+
     @OneToOne
     @JsonSerialize(using = CustomPitSerializer.class)
     private Pit opposite;

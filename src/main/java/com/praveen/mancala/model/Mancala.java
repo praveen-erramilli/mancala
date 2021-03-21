@@ -9,8 +9,8 @@ import javax.persistence.Entity;
 @Setter
 @Entity
 public class Mancala extends Pit {
-    public Mancala(Long id, int coinsCount, Pit next, Player owner, Board board) {
-        super(id, coinsCount, next, owner, null, board);
+    public Mancala(Long id, int coinsCount, Pit next, Player owner, int ownerNumber, Board board) {
+        super(id, coinsCount, next, owner, ownerNumber, null, board);
     }
 
     public Mancala() {
