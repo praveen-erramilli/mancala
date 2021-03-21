@@ -22,7 +22,7 @@ This project is an implementation of Mancala game using Java.
 ### Build
 
 #### Server
-* Ensure that you have MySQL installed. Configure username and password in [src/main/resources/application.properties]
+* Ensure that you have MySQL installed. Configure username and password in [properties](src/main/resources/application.properties)
 * This application requires jre11
 * Switch to project directory on terminal
 * `./mvnw clean install`
