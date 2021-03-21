@@ -11,6 +11,8 @@ import java.util.Optional;
 
 @Repository
 public class GameCache {
+    // assumes there is only one app server
+
     private final GameRepository gameRepository;
 
     @Autowired

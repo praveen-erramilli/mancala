@@ -4,8 +4,6 @@ import com.praveen.mancala.model.*;
 
 import java.util.List;
 
-import static com.praveen.mancala.AppConstants.NUM_PITS;
-
 public class EmptyRowWatcher {
     private Game game;
     public EmptyRowWatcher(Game game) {
@@ -40,19 +38,12 @@ public class EmptyRowWatcher {
     }
 
     private static boolean isEmptyRow(List<Pit> pits) {
-        boolean foundEmpty = true;
-        for(int i=0; i< NUM_PITS; i++) {
-            if(pits.get(i).getCoinsCount() != 0) {
-                foundEmpty = false;
-                break;
-            }
-        }
-        return foundEmpty;
+        return pits.stream().noneMatch(pit -> pit.getCoinsCount() != 0);
     }
 
     private static void pushAllCoinsToMancala(Game game, List<Pit> pits, Mancala mancala) {
-        for(int i=0; i< NUM_PITS; i++) {
-            int pickedCoins = pits.get(i).pickCoins(game);
+        for (Pit pit : pits) {
+            int pickedCoins = pit.pickCoins(game);
             mancala.insertMultipleCoins(game, pickedCoins);
         }
     }

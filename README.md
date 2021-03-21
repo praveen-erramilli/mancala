@@ -11,6 +11,9 @@ This project is an implementation of Mancala game using Java.
 * Caffeine - High performing in-memory cache library. Used to store game data in cache.
 * Swagger - For API Docs
 * Flutter - For UI
+* JUnit5
+* Mockito
+* H2 for test cases
 
 ### Features at a Glance
 
@@ -18,6 +21,21 @@ This project is an implementation of Mancala game using Java.
 * Well covered test cases
 * Game UI designed with Flutter Web. Can be easily ported as mobile application as well with the same code
 * Option to continue any abandoned game
+* REST API based game
+
+### Configurations
+* Both the number of pits and initial number of coins in each pit are configurable from [properties](src/main/resources/application.properties)
+
+### Assumptions
+
+* Cache layer is designed in the assumption that there is only one app server. When this application is horizontally scaled 
+  with multiple app servers, a timestamp based cache invalidation strategy should be used.
+* Ambiguity : In the current design, if a player inserts his last coin in his own empty pit, he will steal his coins and opponents coins
+  and puts in his large pit. In some versions of Mancala, this move is not allowed if the opponent's pit is empty.
+
+### Future Improvements
+
+* Undo, Redo option
 
 ### Build
 
@@ -37,8 +55,8 @@ This project is an implementation of Mancala game using Java.
 * ` python -m http.server 8000` if you python 3 installed
 * Head to the browser and open http://localhost:8000 to play the game
 
-#### API Docs
+### API Docs
 * Swagger API Docs can be accessed by opening http://localhost:8080/swagger-ui/# . This requires jar to be in running state.
 
-#### UI
+### UI
 ![UI](GameUI.png)

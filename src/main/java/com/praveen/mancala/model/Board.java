@@ -11,8 +11,6 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.praveen.mancala.AppConstants.NUM_PITS;
-
 @Data
 @Entity
 @NoArgsConstructor
@@ -53,14 +51,8 @@ public class Board {
         throw new IllegalArgumentException("No pit found for given id");
     }
 
-    private Pit searchPit(Long id, List<Pit> pits0) {
-        for (int j = 0; j < NUM_PITS; j++) {
-            Pit currentPit = pits0.get(j);
-            if (currentPit.getId().equals(id)) {
-                return currentPit;
-            }
-        }
-        return null;
+    private Pit searchPit(Long id, List<Pit> pits) {
+        return pits.stream().filter(currentPit -> currentPit.getId().equals(id)).findFirst().orElse(null);
     }
 
     @Override
