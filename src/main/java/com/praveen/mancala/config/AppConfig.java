@@ -30,11 +30,13 @@ public class AppConfig {
 
     @Bean
     public Docket api() {
-        return new Docket(DocumentationType.OAS_30)
+        Docket docket = new Docket(DocumentationType.OAS_30)
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build();
+        docket.useDefaultResponseMessages(false);
+        return docket;
     }
 
 

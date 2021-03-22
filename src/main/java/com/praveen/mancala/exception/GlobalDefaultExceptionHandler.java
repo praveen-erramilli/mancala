@@ -46,7 +46,7 @@ class GlobalDefaultExceptionHandler {
     }
 
     @org.springframework.web.bind.annotation.ExceptionHandler(value = GameNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     ErrorModel showCustomMessage(GameNotFoundException e){
         return new ErrorModel("Not Found", e.getMessage());
