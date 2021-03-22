@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -96,5 +97,33 @@ public class Pit {
                 ", owner=" + owner +
                 ", opposite=" + opposite.getId() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Pit pit = (Pit) o;
+        if ((opposite == null && pit.opposite != null) || (opposite != null && pit.opposite == null)) {
+            return false;
+        }
+        boolean isEqual = coinsCount == pit.coinsCount && playerNumber == pit.playerNumber && id.equals(pit.id) &&
+                next.id.equals(pit.next.id) && owner.equals(pit.owner) && Objects.equals(opposite, pit.opposite) && board.getId().equals(pit.board.getId());
+        if(opposite != null && pit.opposite != null) {
+            isEqual = isEqual && opposite.id.equals(pit.opposite.id);
+        }
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        if(opposite == null) {
+            return Objects.hash(id, coinsCount, next.id, owner, playerNumber, board.getId());
+        }
+        return Objects.hash(id, coinsCount, next.id, owner, playerNumber, opposite.id, board.getId());
     }
 }

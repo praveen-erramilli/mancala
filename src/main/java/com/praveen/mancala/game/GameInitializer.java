@@ -24,14 +24,14 @@ public class GameInitializer {
 
         List<List<Pit>> pits = initPits(player0, player1);
 
-        //mancala0 next points to player1, pit0
+        //bigPit0 next points to player1, pit0
         BigPit bigPit0 = new BigPit(null, 0, pits.get(1).get(0), player0,0, null);
-        //mancala1 next points to player0, pit0
+        //bigPit1 next points to player0, pit0
         BigPit bigPit1 = new BigPit(null, 0, pits.get(0).get(0), player1,1, null);
         int numberOfPits = env.getNumberOfPits();
-        //player1, end pit next points to mancala1
+        //player1, end pit next points to bigPit1
         pits.get(1).get(numberOfPits-1).setNext(bigPit1);
-        //player0, end pit next points to mancala0
+        //player0, end pit next points to bigPit0
         pits.get(0).get(numberOfPits-1).setNext(bigPit0);
 
         Board board = new Board(null, pits.get(0), pits.get(1), bigPit0, bigPit1);
