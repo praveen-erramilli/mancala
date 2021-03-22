@@ -19,7 +19,7 @@ This project is an implementation of Mancala game using Java.
 
 * Two player game
 * Well covered test cases
-* Game UI designed with Flutter Web. Can be easily ported as mobile application as well with the same code
+* Game UI designed with Flutter Web. Can be easily ported to mobile application as well with the same code
 * Option to continue any abandoned game
 * REST API based game
 
@@ -28,19 +28,20 @@ This project is an implementation of Mancala game using Java.
 
 ### Assumptions
 
-* Cache layer is designed in the assumption that there is only one app server. When this application is horizontally scaled 
+* Cache layer is designed with the assumption that there is only one app server. When this application is horizontally scaled 
   with multiple app servers, a timestamp based cache invalidation strategy should be used.
 * Ambiguity : In the current design, if a player inserts his last coin in his own empty pit, he will steal his coins and opponents coins
-  and puts in his large pit. In some versions of Mancala, this move is not allowed if the opponent's pit is empty.
+  and puts in his large pit. In some versions of Mancala, stealing is not allowed if the opponent's pit is empty.
 
 ### Future Improvements
 
-* Undo, Redo option
+* Undo, Redo moves
 
 ### Build
 
 #### Server
 * Ensure that you have MySQL installed. Configure username and password in [properties](src/main/resources/application.properties)
+* Run the SQL Command `create database mancala;`
 * This application requires jre11
 * Switch to project directory on terminal
 * `./mvnw clean install`
