@@ -5,7 +5,7 @@ import com.praveen.mancala.model.*;
 import java.util.List;
 
 public class EmptyRowWatcher {
-    private Game game;
+    private final Game game;
     public EmptyRowWatcher(Game game) {
         this.game = game;
     }
@@ -37,11 +37,11 @@ public class EmptyRowWatcher {
         }
     }
 
-    private static boolean isEmptyRow(List<Pit> pits) {
+    private boolean isEmptyRow(List<Pit> pits) {
         return pits.stream().noneMatch(pit -> pit.getCoinsCount() != 0);
     }
 
-    private static void pushAllCoinsToMancala(Game game, List<Pit> pits, BigPit bigPit) {
+    private void pushAllCoinsToMancala(Game game, List<Pit> pits, BigPit bigPit) {
         for (Pit pit : pits) {
             int pickedCoins = pit.pickCoins(game);
             bigPit.insertMultipleCoins(game, pickedCoins);

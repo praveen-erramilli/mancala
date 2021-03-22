@@ -21,8 +21,7 @@ public class GameCache implements IGameCache {
     }
 
     private static final Cache<Long, Optional<Game>> CACHE = Caffeine.newBuilder()
-            .maximumSize(1000)
-            .weakValues()
+            .maximumSize(100)
             .build();
 
     @Override
