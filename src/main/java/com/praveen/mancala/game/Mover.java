@@ -4,16 +4,16 @@ import com.praveen.mancala.model.Game;
 import com.praveen.mancala.model.GameStatus;
 import com.praveen.mancala.model.Pit;
 
-public class Picker {
+public class Mover {
     private final Long pitID;
     private final Game game;
 
-    public Picker(Long pitID, Game game) {
+    public Mover(Long pitID, Game game) {
         this.pitID = pitID;
         this.game = game;
     }
 
-    public void runPicker() {
+    public void makeMove() {
         if(game.getGameStatus() != GameStatus.IN_PROGRESS) {
             throw new IllegalStateException("Cannot run the game that is not in progress");
         }

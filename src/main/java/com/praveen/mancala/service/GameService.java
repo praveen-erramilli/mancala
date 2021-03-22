@@ -5,7 +5,7 @@ import com.praveen.mancala.exception.GameNotFoundException;
 import com.praveen.mancala.game.EmptyRowWatcher;
 import com.praveen.mancala.game.GameInitializer;
 import com.praveen.mancala.model.Game;
-import com.praveen.mancala.game.Picker;
+import com.praveen.mancala.game.Mover;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,8 +36,8 @@ public class GameService {
         //ask picker to pick the pit and run
         Game game = getGame(id);
 
-        Picker picker = new Picker(pitID, game);
-        picker.runPicker();
+        Mover mover = new Mover(pitID, game);
+        mover.makeMove();
 
         EmptyRowWatcher emptyRowWatcher = new EmptyRowWatcher(game);
         emptyRowWatcher.watchAndHandleEmptyRow();
