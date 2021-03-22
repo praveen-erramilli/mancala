@@ -2,6 +2,7 @@ package com.praveen.mancala.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.praveen.mancala.AppEnv;
+import com.praveen.mancala.cache.IGameCache;
 import com.praveen.mancala.model.Board;
 import com.praveen.mancala.model.Game;
 import com.praveen.mancala.model.GameStatus;
@@ -22,8 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -35,7 +39,7 @@ public class GameIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private GameRepository gameRepository;
+    private IGameCache gameRepository;
 
     @Autowired
     private GameService gameService;
@@ -48,6 +52,70 @@ public class GameIntegrationTest {
 
     @Test
     public void testCreatingGame() throws Exception {
+        Game game = createANewGame();
+
+        //check num of coins in big pits
+        assertEquals(0, game.getBoard().getBigPitForPlayerZero().getCoinsCount());
+        assertEquals(0, game.getBoard().getBigPitForPlayerOne().getCoinsCount());
+        assertEquals(game.getPlayerZero(), game.getCurrentPlayer());
+        assertFalse(game.isTie());
+        assertNull(game.getWinner());
+        checkBoardIntegrity(game);
+    }
+
+    @Test
+    public void testAnotherChanceForPlayerZero() throws Exception {
+        Game game = createANewGame();
+        Pit firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
+
+        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getId().toString()))
+               .andExpect(status().is(200))
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())))
+               .andExpect(jsonPath("$.gameStatus", Matchers.is(GameStatus.IN_PROGRESS.name())))
+               .andExpect(jsonPath("$.winner", Matchers.nullValue()))
+               .andExpect(jsonPath("$.tie", Matchers.is(Boolean.FALSE)))
+               .andExpect(jsonPath("$.lastInsertedPit.id", Matchers.is(game.getBoard().getBigPitForPlayerZero().getId().intValue())))
+               .andExpect(jsonPath("$.currentPlayer.playerNumber", Matchers.is(game.getPlayerZero().getPlayerNumber())))
+               .andExpect(jsonPath("$.currentPlayer.id", Matchers.is(game.getPlayerZero().getId().intValue())));
+        Game gameFromDB = gameRepository.getGame(game.getId()).get();
+        checkBoardIntegrity(gameFromDB);
+    }
+
+    @Test
+    public void testAnotherChanceForPlayerOne() throws Exception {
+        Game game = createANewGame();
+        Pit firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
+
+        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getId().toString()))
+               .andExpect(status().is(200))
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())));
+        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getNext().getId().toString()))
+               .andExpect(status().is(200))
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())));
+
+        //chance now goes to player one
+        Game gameFromDB = gameRepository.getGame(game.getId()).get();
+        assertEquals(game.getPlayerOne(), gameFromDB.getCurrentPlayer());
+
+        List<Pit> pitsForPlayerOne = gameFromDB.getBoard().getPitsForPlayerOne();
+        Pit lastPit = pitsForPlayerOne.get(pitsForPlayerOne.size()-1);
+        Pit firstPit = pitsForPlayerOne.get(0);
+        firstPit.setCoinsCount(firstPit.getCoinsCount() + lastPit.getCoinsCount());
+        lastPit.setCoinsCount(1);
+        gameRepository.saveGame(gameFromDB);
+
+        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",lastPit.getId().toString()))
+               .andExpect(status().is(200))
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())));
+        gameFromDB = gameRepository.getGame(game.getId()).get();
+        assertEquals(game.getPlayerOne(), gameFromDB.getCurrentPlayer());
+    }
+
+    private Game createANewGame() throws Exception {
         MvcResult mvcResult = mockMvc.perform(post("/api/v1/game"))
                                      .andExpect(status().is(200))
                                      .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -60,12 +128,8 @@ public class GameIntegrationTest {
                                      .andReturn();
 
         JSONObject gameJson = new JSONObject(mvcResult.getResponse().getContentAsString());
-        Game game = gameRepository.findById(gameJson.getLong("id")).get();
-
-        //check num of coins in big pits
-        assertEquals(0, game.getBoard().getBigPitForPlayerZero().getCoinsCount());
-        assertEquals(0, game.getBoard().getBigPitForPlayerOne().getCoinsCount());
-        checkBoardIntegrity(game);
+        Game game = gameRepository.getGame(gameJson.getLong("id")).get();
+        return game;
     }
 
     private void checkBoardIntegrity(Game game) {

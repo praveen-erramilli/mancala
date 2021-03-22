@@ -1,13 +1,13 @@
 package com.praveen.mancala.model;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Entity;
 
-@Getter
-@Setter
 @Entity
+@Data
 public class BigPit extends Pit {
     public BigPit(Long id, int coinsCount, Pit next, Player owner, int ownerNumber, Board board) {
         super(id, coinsCount, next, owner, ownerNumber, null, board);
