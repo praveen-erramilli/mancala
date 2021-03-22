@@ -33,7 +33,7 @@ public class GameService {
     }
 
     public Game makeMove(Long id, Long pitID) {
-        //ask picker to pick the pit and run
+        //ask mover to pick the coins from pit and run
         Game game = getGame(id);
 
         Mover mover = new Mover(pitID, game);
