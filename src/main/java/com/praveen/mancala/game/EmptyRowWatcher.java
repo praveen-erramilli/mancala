@@ -12,27 +12,27 @@ public class EmptyRowWatcher {
 
     public void watchAndHandleEmptyRow() {
         Board board = game.getBoard();
-        boolean foundEmpty0 = isEmptyRow(board.getPits0());
-        boolean foundEmpty1 = isEmptyRow(board.getPits1());
+        boolean foundEmpty0 = isEmptyRow(board.getPitsForPlayerZero());
+        boolean foundEmpty1 = isEmptyRow(board.getPitsForPlayerOne());
 
         if(foundEmpty0) {
             game.setGameStatus(GameStatus.GAMEOVER);
-            pushAllCoinsToMancala(game, board.getPits1(), board.getMancala1());
+            pushAllCoinsToMancala(game, board.getPitsForPlayerOne(), board.getBigPitForPlayerOne());
         } else if(foundEmpty1) {
             game.setGameStatus(GameStatus.GAMEOVER);
-            pushAllCoinsToMancala(game, board.getPits0(), board.getMancala0());
+            pushAllCoinsToMancala(game, board.getPitsForPlayerZero(), board.getBigPitForPlayerZero());
         }
 
         if(foundEmpty0 || foundEmpty1) {
-            Mancala mancala0 = board.getMancala0();
-            Mancala mancala1 = board.getMancala1();
+            BigPit bigPit0 = board.getBigPitForPlayerZero();
+            BigPit bigPit1 = board.getBigPitForPlayerOne();
 
-            if(mancala0.getCoinsCount() == mancala1.getCoinsCount()) {
+            if(bigPit0.getCoinsCount() == bigPit1.getCoinsCount()) {
                 game.setTie(true);
-            } else if(mancala0.getCoinsCount() < mancala1.getCoinsCount()) {
-                game.setWinner(game.getPlayer1());
+            } else if(bigPit0.getCoinsCount() < bigPit1.getCoinsCount()) {
+                game.setWinner(game.getPlayerOne());
             } else {
-                game.setWinner(game.getPlayer0());
+                game.setWinner(game.getPlayerZero());
             }
         }
     }
@@ -41,10 +41,10 @@ public class EmptyRowWatcher {
         return pits.stream().noneMatch(pit -> pit.getCoinsCount() != 0);
     }
 
-    private static void pushAllCoinsToMancala(Game game, List<Pit> pits, Mancala mancala) {
+    private static void pushAllCoinsToMancala(Game game, List<Pit> pits, BigPit bigPit) {
         for (Pit pit : pits) {
             int pickedCoins = pit.pickCoins(game);
-            mancala.insertMultipleCoins(game, pickedCoins);
+            bigPit.insertMultipleCoins(game, pickedCoins);
         }
     }
 }

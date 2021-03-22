@@ -1,6 +1,6 @@
 package com.praveen.mancala.service;
 
-import com.praveen.mancala.cache.GameCache;
+import com.praveen.mancala.cache.IGameCache;
 import com.praveen.mancala.exception.GameNotFoundException;
 import com.praveen.mancala.game.EmptyRowWatcher;
 import com.praveen.mancala.game.GameInitializer;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GameService {
-    private final GameCache gameCache;
+    private final IGameCache gameCache;
     private final GameInitializer gameInitializer;
 
     @Autowired
-    public GameService(GameCache gameCache, GameInitializer gameInitializer) {
+    public GameService(IGameCache gameCache, GameInitializer gameInitializer) {
         this.gameCache = gameCache;
         this.gameInitializer = gameInitializer;
     }

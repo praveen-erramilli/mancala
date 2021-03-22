@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public class GameCache {
+public class GameCache implements IGameCache {
     // assumes there is only one app server
 
     private final GameRepository gameRepository;
@@ -25,10 +25,12 @@ public class GameCache {
             .weakValues()
             .build();
 
+    @Override
     public Optional<Game> getGame(Long gameId) {
         return CACHE.get(gameId, ((key) -> gameRepository.findById(gameId)));
     }
 
+    @Override
     public Game saveGame(Game game) {
         Game savedGame = gameRepository.save(game);
         CACHE.put(game.getId(), Optional.of(savedGame));

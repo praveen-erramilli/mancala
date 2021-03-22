@@ -8,12 +8,12 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 @Entity
-public class Mancala extends Pit {
-    public Mancala(Long id, int coinsCount, Pit next, Player owner, int ownerNumber, Board board) {
+public class BigPit extends Pit {
+    public BigPit(Long id, int coinsCount, Pit next, Player owner, int ownerNumber, Board board) {
         super(id, coinsCount, next, owner, ownerNumber, null, board);
     }
 
-    public Mancala() {
+    public BigPit() {
     }
 
     @Override

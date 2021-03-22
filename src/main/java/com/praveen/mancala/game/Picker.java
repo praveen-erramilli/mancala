@@ -22,16 +22,14 @@ public class Picker {
         if(!pit.canPickCoins(game)) {
             throw new UnsupportedOperationException("User is not allowed to pick from this pit");
         }
-        System.out.println(pit.getId());
         int pickedCoins = pit.pickCoins(game);
         while (pickedCoins-- > 0) {
             if(pit.getNext().canInsert(game)) {
                 pit = pit.getNext();
             } else {
-                //pit.next is a other player's mancala. So skip inserting into it
+                //if pit.next is the other player's big pit. So skip inserting into it
                 pit = pit.getNext().getNext();
             }
-            System.out.println(pit.getId());
             pit.insertCoin(game);
             if(pickedCoins == 0) {
                 game.setLastInsertedPit(pit);

@@ -25,18 +25,18 @@ public class GameInitializer {
         List<List<Pit>> pits = initPits(player0, player1);
 
         //mancala0 next points to player1, pit0
-        Mancala mancala0 = new Mancala(null, 0, pits.get(1).get(0), player0,0, null);
+        BigPit bigPit0 = new BigPit(null, 0, pits.get(1).get(0), player0,0, null);
         //mancala1 next points to player0, pit0
-        Mancala mancala1 = new Mancala(null, 0, pits.get(0).get(0), player1,1, null);
+        BigPit bigPit1 = new BigPit(null, 0, pits.get(0).get(0), player1,1, null);
         int numberOfPits = env.getNumberOfPits();
         //player1, end pit next points to mancala1
-        pits.get(1).get(numberOfPits-1).setNext(mancala1);
+        pits.get(1).get(numberOfPits-1).setNext(bigPit1);
         //player0, end pit next points to mancala0
-        pits.get(0).get(numberOfPits-1).setNext(mancala0);
+        pits.get(0).get(numberOfPits-1).setNext(bigPit0);
 
-        Board board = new Board(null, pits.get(0), pits.get(1), mancala0, mancala1);
-        mancala0.setBoard(board);
-        mancala1.setBoard(board);
+        Board board = new Board(null, pits.get(0), pits.get(1), bigPit0, bigPit1);
+        bigPit0.setBoard(board);
+        bigPit1.setBoard(board);
 
         pits.get(0).forEach(pit -> pit.setBoard(board));
         pits.get(1).forEach(pit -> pit.setBoard(board));

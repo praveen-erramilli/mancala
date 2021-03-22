@@ -9,7 +9,6 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Entity
@@ -23,28 +22,30 @@ public class Board {
 
     @OneToMany(targetEntity = Pit.class, mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
-    @Where(clause = "opposite_id IS NOT NULL AND player_number='0'")
-    private List<Pit> pits0;
+    @Where(clause = "dtype = 'Pit' AND player_number='0'")
+    private List<Pit> pitsForPlayerZero;
 
     @OneToMany(targetEntity = Pit.class, mappedBy = "board", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonManagedReference
-    @Where(clause = "opposite_id IS NOT NULL AND player_number='1'")
-    private List<Pit> pits1;
+    @Where(clause = "dtype = 'Pit' AND player_number='1'")
+    private List<Pit> pitsForPlayerOne;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private Mancala mancala0;
+    @Where(clause = "dtype = 'BigPit' AND player_number='0'")
+    private BigPit bigPitForPlayerZero;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private Mancala mancala1;
+    @Where(clause = "dtype = 'BigPit' AND player_number='1'")
+    private BigPit bigPitForPlayerOne;
 
     public Pit fetchPit(Long id) {
 
-        Pit currentPit1 = searchPit(id, pits0);
+        Pit currentPit1 = searchPit(id, pitsForPlayerZero);
         if (currentPit1 != null) {
             return currentPit1;
         }
 
-        Pit currentPit = searchPit(id, pits1);
+        Pit currentPit = searchPit(id, pitsForPlayerOne);
         if (currentPit != null) {
             return currentPit;
         }

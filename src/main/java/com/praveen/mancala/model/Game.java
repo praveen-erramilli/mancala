@@ -1,10 +1,7 @@
 package com.praveen.mancala.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -21,15 +18,16 @@ public class Game {
     private Board board;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private Player player0;
+    private Player playerZero;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private Player player1;
+    private Player playerOne;
 
     @Enumerated
     private GameStatus gameStatus;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @Setter(value = AccessLevel.PRIVATE)
     private Player currentPlayer;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -41,18 +39,18 @@ public class Game {
     private Pit lastInsertedPit;
 
     @JsonIgnore
-    public Mancala getCurrentPlayerMancala() {
+    public BigPit getCurrentPlayerMancala() {
         if(currentPlayer.getPlayerNumber() == 0) {
-            return board.getMancala0();
+            return board.getBigPitForPlayerZero();
         }
-        return board.getMancala1();
+        return board.getBigPitForPlayerOne();
     }
 
     public void switchPlayer() {
-        if(getCurrentPlayer().equals(player0)) {
-            setCurrentPlayer(player1);
+        if(getCurrentPlayer().equals(playerZero)) {
+            setCurrentPlayer(playerOne);
         } else {
-            setCurrentPlayer(player0);
+            setCurrentPlayer(playerZero);
         }
     }
 
@@ -60,8 +58,8 @@ public class Game {
     public String toString() {
         return "Game{" +
                 "id=" + id +
-                ", player0=" + player0 +
-                ", player1=" + player1 +
+                ", player0=" + playerZero +
+                ", player1=" + playerOne +
                 ", gameStatus=" + gameStatus +
                 ", currentPlayer=" + currentPlayer +
                 ", winner=" + winner +
