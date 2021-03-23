@@ -13,12 +13,13 @@ This project is an implementation of Mancala game using Java.
 * Flutter - For UI
 * JUnit5
 * Mockito
-* H2 for test cases
+* H2 database for test cases
+* JaCoCo for test code coverage with 85% of lines covered
 
 ### Features at a Glance
 
 * Two player game
-* Well covered test cases
+* Well covered test cases with 85% coverage
 * Game UI designed with Flutter Web. Can be easily ported to mobile application as well with the same code
 * Option to continue any abandoned game
 * REST API based game

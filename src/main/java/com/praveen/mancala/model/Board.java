@@ -55,11 +55,4 @@ public class Board {
     private Pit searchPit(Long id, List<Pit> pits) {
         return pits.stream().filter(currentPit -> currentPit.getId().equals(id)).findFirst().orElse(null);
     }
-
-    @Override
-    public String toString() {
-        return "Board{" +
-                "id=" + id +
-                '}';
-    }
 }

@@ -41,9 +41,4 @@ public class BigPit extends Pit {
     public boolean canPickCoins(Game game) {
         return false;
     }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 }

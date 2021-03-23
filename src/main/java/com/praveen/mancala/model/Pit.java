@@ -89,17 +89,6 @@ public class Pit {
     }
 
     @Override
-    public String toString() {
-        return "Pit{" +
-                "id=" + id +
-                ", coinsCount=" + coinsCount +
-                ", next=" + next.getId() +
-                ", owner=" + owner +
-                ", opposite=" + opposite.getId() +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
