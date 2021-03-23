@@ -53,7 +53,7 @@ public class Pit {
         }
         if(coinsCount == 1 && game.getCurrentPlayer().equals(owner)) {
             int totalPickedCoins = pickCoins(game) + (opposite.canPickCoins(game) ? opposite.pickCoins(game) : 0);
-            game.getCurrentPlayerMancala().insertMultipleCoins(game, totalPickedCoins);
+            game.getCurrentPlayerBigPit().insertMultipleCoins(game, totalPickedCoins);
         }
         game.switchPlayer();
     }

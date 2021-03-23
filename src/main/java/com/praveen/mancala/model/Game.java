@@ -40,7 +40,7 @@ public class Game {
     private Pit lastInsertedPit;
 
     @JsonIgnore
-    public BigPit getCurrentPlayerMancala() {
+    public BigPit getCurrentPlayerBigPit() {
         if(currentPlayer.getPlayerNumber() == 0) {
             return board.getBigPitForPlayerZero();
         }
