@@ -6,6 +6,7 @@ import com.praveen.mancala.service.GameService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/v1/game")
+@Slf4j
 public class GameController {
     private final GameService gameService;
     private final ModelMapper modelMapper;
@@ -36,6 +38,7 @@ public class GameController {
             }
     )
     public GameDto getGame(@PathVariable(value = "id") Long id) {
+        log.info("Requested a game having id {}",id);
         Game game = gameService.getGame(id);
         return modelMapper.map(game, GameDto.class);
     }
@@ -49,8 +52,10 @@ public class GameController {
             }
     )
     public GameDto createGame(HttpServletResponse response) {
+        log.info("Create Game request received");
         Game game = gameService.createGame();
         response.setStatus(HttpStatus.CREATED.value());
+        log.info("Created a game with id {}",game.getId());
         return modelMapper.map(game, GameDto.class);
     }
 
@@ -66,6 +71,7 @@ public class GameController {
             }
     )
     public GameDto makeMove(@PathVariable("id") Long id, @RequestParam("pit_id") Long pitID) {
+        log.info("Received a move for the pit {} in the game {} ",pitID, id);
         Game game = gameService.makeMove(id, pitID);
         return modelMapper.map(game, GameDto.class);
     }
