@@ -2,33 +2,37 @@ package com.praveen.mancala.integrations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.praveen.mancala.AppEnv;
+import com.praveen.mancala.MancalaApplication;
 import com.praveen.mancala.cache.IGameCache;
 import com.praveen.mancala.model.*;
+import com.praveen.mancala.payload.BoardDto;
+import com.praveen.mancala.payload.GameDto;
+import com.praveen.mancala.payload.PitDto;
+import com.praveen.mancala.payload.PlayerDto;
 import com.praveen.mancala.service.GameService;
-import org.hamcrest.Matchers;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(classes = MancalaApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class GameIntegrationTest {
 
+    @LocalServerPort
+    private int port;
+
     @Autowired
-    private MockMvc mockMvc;
+    private TestRestTemplate restTemplate;
 
     @Autowired
     private IGameCache gameRepository;
@@ -42,9 +46,12 @@ public class GameIntegrationTest {
     @Autowired
     private AppEnv appEnv;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Test
     public void testCreatingGame() throws Exception {
-        Game game = createANewGame();
+        GameDto game = createANewGame();
 
         //check num of coins in big pits
         assertEquals(0, game.getBoard().getBigPitForPlayerZero().getCoinsCount());
@@ -52,70 +59,59 @@ public class GameIntegrationTest {
         assertEquals(game.getPlayerZero(), game.getCurrentPlayer());
         assertFalse(game.isTie());
         assertNull(game.getWinner());
-        checkBoardIntegrity(game);
+        checkBoardIntegrity(gameRepository.getGame(game.getId()).get());
     }
 
     @Test
     public void testGettingAGame() throws Exception {
-        Game game = createANewGame();
-        mockMvc.perform(get("/api/v1/game/"+game.getId()))
-               .andExpect(status().is(200))
+        GameDto game = createANewGame();
 
-               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())))
-               .andExpect(jsonPath("$.gameStatus", Matchers.is(GameStatus.IN_PROGRESS.name())))
-               .andExpect(jsonPath("$.winner", Matchers.nullValue()))
-               .andExpect(jsonPath("$.tie", Matchers.is(Boolean.FALSE)))
-               .andExpect(jsonPath("$.currentPlayer.playerNumber", Matchers.is(game.getPlayerZero().getPlayerNumber())))
-               .andExpect(jsonPath("$.currentPlayer.id", Matchers.is(game.getPlayerZero().getId().intValue())));
+        GameDto gameFromAPI = getGame(game.getId());
+        assertEquals(game.getId(), gameFromAPI.getId());
+        assertEquals(GameStatus.IN_PROGRESS, gameFromAPI.getGameStatus());
+        assertNull(gameFromAPI.getWinner());
+        assertFalse(gameFromAPI.isTie());
+        assertEquals(game.getPlayerZero(), gameFromAPI.getCurrentPlayer());
     }
 
 
     @Test
     public void testGettingAnInvalidGame() throws Exception {
-        Game game = createANewGame();
-        mockMvc.perform(get("/api/v1/game/"+1154564))
-               .andExpect(status().is(404))
-
-               .andExpect(jsonPath("$.status", Matchers.is("Not Found")))
-               .andExpect(jsonPath("$.error", Matchers.is("Invalid argument passed for id. No such game found")));
+        GameDto game = createANewGame();
+        ResponseEntity<ErrorModel> responseEntity = restTemplate.getForEntity(gameURL() + "/123412342", ErrorModel.class);
+        assertEquals(404, responseEntity.getStatusCode().value());
+        assertNotNull(responseEntity.getBody());
+        assertEquals("Not Found", responseEntity.getBody().getStatus());
+        assertEquals("Invalid argument passed for id. No such game found", responseEntity.getBody().getError());
     }
 
     @Test
     public void testAnotherChanceForPlayerZero() throws Exception {
-        Game game = createANewGame();
-        Pit firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
+        GameDto game = createANewGame();
+        PitDto firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getId().toString()))
-               .andExpect(status().is(200))
+        GameDto gameResponse = makeAMove(game.getId(), firstPitForPlayerZero.getId());
+        assertEquals(GameStatus.IN_PROGRESS, gameResponse.getGameStatus());
+        assertNull(gameResponse.getWinner());
+        assertFalse(gameResponse.isTie());
+        assertEquals(game.getBoard().getBigPitForPlayerZero().getId().intValue(), gameResponse.getLastInsertedPit().getId());
+        assertEquals(game.getPlayerZero(), gameResponse.getCurrentPlayer());
 
-               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())))
-               .andExpect(jsonPath("$.gameStatus", Matchers.is(GameStatus.IN_PROGRESS.name())))
-               .andExpect(jsonPath("$.winner", Matchers.nullValue()))
-               .andExpect(jsonPath("$.tie", Matchers.is(Boolean.FALSE)))
-               .andExpect(jsonPath("$.lastInsertedPit.id", Matchers.is(game.getBoard().getBigPitForPlayerZero().getId().intValue())))
-               .andExpect(jsonPath("$.currentPlayer.playerNumber", Matchers.is(game.getPlayerZero().getPlayerNumber())))
-               .andExpect(jsonPath("$.currentPlayer.id", Matchers.is(game.getPlayerZero().getId().intValue())));
         Game gameFromDB = gameRepository.getGame(game.getId()).get();
         checkBoardIntegrity(gameFromDB);
     }
 
     @Test
     public void testAnotherChanceForPlayerOne() throws Exception {
-        Game game = createANewGame();
-        Pit firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
+        GameDto game = createANewGame();
+        PitDto firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getId().toString()))
-               .andExpect(status().is(200))
-
-               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())));
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getNext().getId().toString()))
-               .andExpect(status().is(200))
-
-               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())));
+        makeAMove(game.getId(), firstPitForPlayerZero.getId());
+        makeAMove(game.getId(), firstPitForPlayerZero.getNext());
 
         //chance now goes to player one
         Game gameFromDB = gameRepository.getGame(game.getId()).get();
-        assertEquals(game.getPlayerOne(), gameFromDB.getCurrentPlayer());
+        assertEquals(game.getPlayerOne(), modelMapper.map(gameFromDB.getCurrentPlayer(), PlayerDto.class));
         checkBoardIntegrity(gameFromDB);
 
         List<Pit> pitsForPlayerOne = gameFromDB.getBoard().getPitsForPlayerOne();
@@ -125,47 +121,36 @@ public class GameIntegrationTest {
         lastPit.setCoinsCount(1);
         gameRepository.saveGame(gameFromDB);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",lastPit.getId().toString()))
-               .andExpect(status().is(200))
+        makeAMove(game.getId(), lastPit.getId());
 
-               .andExpect(jsonPath("$.id", Matchers.is(game.getId().intValue())));
         gameFromDB = gameRepository.getGame(game.getId()).get();
-        assertEquals(game.getPlayerOne(), gameFromDB.getCurrentPlayer());
+        assertEquals(game.getPlayerOne(), modelMapper.map(gameFromDB.getCurrentPlayer(), PlayerDto.class));
         checkBoardIntegrity(gameFromDB);
     }
 
 
     @Test
     public void testSelectingOpponentsPitByPlayerZero() throws Exception {
-        Game game = createANewGame();
-        Pit firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
+        GameDto game = createANewGame();
+        PitDto firstPitForPlayerZero = game.getBoard().getPitsForPlayerZero().get(0);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id",firstPitForPlayerZero.getOpposite().getId().toString()))
-               .andExpect(status().is(400))
-
-               .andExpect(jsonPath("$.status", Matchers.is("Invalid Operation")))
-               .andExpect(jsonPath("$.error", Matchers.is("User is not allowed to pick from this pit")));
-
+        makeAMoveExpectError(game.getId(), firstPitForPlayerZero.getOpposite(), 400, "Invalid Operation", "User is not allowed to pick from this pit");
     }
 
     @Test
     public void testSelectingOpponentsPitByPlayerOne() throws Exception {
-        Game game = createANewGame();
-        Pit pit = game.getBoard().getPitsForPlayerZero().get(3);
+        GameDto game = createANewGame();
+        PitDto pit = game.getBoard().getPitsForPlayerZero().get(3);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id", pit.getId().toString()))
-               .andExpect(status().is(200));
-
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id", pit.getNext().getId().toString()))
-               .andExpect(status().is(400))
-
-               .andExpect(jsonPath("$.status", Matchers.is("Invalid Operation")))
-               .andExpect(jsonPath("$.error", Matchers.is("User is not allowed to pick from this pit")));
+        makeAMove(game.getId(), pit.getId());
+        makeAMoveExpectError(game.getId(), pit.getNext(), 400, "Invalid Operation", "User is not allowed to pick from this pit");
     }
 
     @Test
     public void testWinningMoveForPlayerOne() throws Exception {
-        Game game = createANewGame();
+        GameDto gameDto = createANewGame();
+        Game game = gameRepository.getGame(gameDto.getId()).get();
+
         List<Pit> pitsForPlayerZero = game.getBoard().getPitsForPlayerZero();
         for (Pit pit : pitsForPlayerZero) {
             Pit opposite = pit.getOpposite();
@@ -179,8 +164,7 @@ public class GameIntegrationTest {
 
         gameRepository.saveGame(game);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id", lastPit.getId().toString()))
-               .andExpect(status().is(200));
+        makeAMove(game.getId(), lastPit.getId());
 
         Game game1 = gameRepository.getGame(game.getId()).get();
         assertFalse(game1.isTie());
@@ -190,7 +174,9 @@ public class GameIntegrationTest {
 
     @Test
     public void testMovingWithGameNotInProgress() throws Exception {
-        Game game = createANewGame();
+        GameDto gameDto = createANewGame();
+        Game game = gameRepository.getGame(gameDto.getId()).get();
+
         List<Pit> pitsForPlayerZero = game.getBoard().getPitsForPlayerZero();
         for (Pit pit : pitsForPlayerZero) {
             Pit opposite = pit.getOpposite();
@@ -204,21 +190,18 @@ public class GameIntegrationTest {
 
         gameRepository.saveGame(game);
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id", lastPit.getId().toString()))
-               .andExpect(status().is(200));
+        makeAMove(game.getId(), lastPit.getId());
 
         Game game1 = gameRepository.getGame(game.getId()).get();
 
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id", lastPit.getId().toString()))
-               .andExpect(status().is(400))
-
-               .andExpect(jsonPath("$.status", Matchers.is("Invalid State")))
-               .andExpect(jsonPath("$.error", Matchers.is("Cannot run the game that is not in progress")));
+        makeAMoveExpectError(game.getId(), lastPit.getId(), 400, "Invalid State", "Cannot run the game that is not in progress");
     }
 
     @Test
     public void testStealing() throws Exception {
-        Game game = createANewGame();
+        GameDto gameDto = createANewGame();
+        Game game = gameRepository.getGame(gameDto.getId()).get();
+
         List<Pit> pitsForPlayerZero = game.getBoard().getPitsForPlayerZero();
         Pit secondPit = pitsForPlayerZero.get(1);
         Pit secondOpp = secondPit.getOpposite();
@@ -234,9 +217,7 @@ public class GameIntegrationTest {
         thirdPit.setCoinsCount(0);
         gameRepository.saveGame(game);
 
-
-        mockMvc.perform(put("/api/v1/game/"+game.getId()).param("pit_id", secondPit.getId().toString()))
-               .andExpect(status().is(200));
+        makeAMove(game.getId(), secondPit.getId());
 
         game = gameRepository.getGame(game.getId()).get();
         checkBoardIntegrity(game);
@@ -258,7 +239,9 @@ public class GameIntegrationTest {
 
     @Test
     public void testInsertingToBigPit() throws Exception {
-        Game game = createANewGame();
+        GameDto gameDto = createANewGame();
+        Game game = gameRepository.getGame(gameDto.getId()).get();
+
         BigPit bigPitForPlayerOne = game.getBoard().getBigPitForPlayerOne();
 
         Assertions.assertThrows(UnsupportedOperationException.class, () ->
@@ -273,7 +256,8 @@ public class GameIntegrationTest {
 
     @Test
     public void fetchBoardForInvalidID() throws Exception {
-        Game game = createANewGame();
+        GameDto gameDto = createANewGame();
+        Game game = gameRepository.getGame(gameDto.getId()).get();
 
         Assertions.assertThrows(IllegalArgumentException.class, () ->
         game.getBoard().fetchPit(-1L));
@@ -281,7 +265,9 @@ public class GameIntegrationTest {
 
     @Test
     public void insertIntoInvalidPit() throws Exception {
-        Game game = createANewGame();
+        GameDto gameDto = createANewGame();
+        Game game = gameRepository.getGame(gameDto.getId()).get();
+
         BigPit pit = game.getBoard().getBigPitForPlayerOne();
         assertThrows(UnsupportedOperationException.class , () -> pit.insertCoin(game));
         assertThrows(UnsupportedOperationException.class , () -> pit.onLastCoinInsert(game));
@@ -290,21 +276,58 @@ public class GameIntegrationTest {
         assertFalse(pit.canPickCoins(game));
     }
 
-    private Game createANewGame() throws Exception {
-        MvcResult mvcResult = mockMvc.perform(post("/api/v1/game"))
-                                     .andExpect(status().is(200))
-
-                                     .andExpect(jsonPath("$.id", Matchers.notNullValue(Long.class)))
-                                     .andExpect(jsonPath("$.gameStatus",
-                                             Matchers.is(GameStatus.IN_PROGRESS.name())))
-                                     .andExpect(jsonPath("$.winner", Matchers.nullValue()))
-                                     .andExpect(jsonPath("$.tie", Matchers.is(Boolean.FALSE)))
-                                     .andExpect(jsonPath("$.lastInsertedPit", Matchers.nullValue()))
-                                     .andReturn();
-
-        JSONObject gameJson = new JSONObject(mvcResult.getResponse().getContentAsString());
-        Game game = gameRepository.getGame(gameJson.getLong("id")).get();
+    private GameDto createANewGame() throws Exception {
+        ResponseEntity<GameDto> gameResponseEntity = restTemplate.postForEntity(gameURL(), null, GameDto.class);
+        assertEquals(201, gameResponseEntity.getStatusCode().value());
+        GameDto game = gameResponseEntity.getBody();
+        assertNotNull(game);
+        assertNotNull(game.getId());
+        assertEquals(game.getGameStatus(), GameStatus.IN_PROGRESS);
+        assertNull(game.getWinner());
+        assertFalse(game.isTie());
+        assertNull(game.getLastInsertedPit());
         return game;
+    }
+
+    private GameDto getGame(Long id) {
+        ResponseEntity<GameDto> responseEntity = restTemplate.getForEntity(gameURL() + "/" + id, GameDto.class);
+        assertEquals(200, responseEntity.getStatusCode().value());
+        return responseEntity.getBody();
+    }
+
+    private GameDto makeAMove(Long gameId, Long pitId) {
+        ResponseEntity<GameDto> game = callPutAPI(gameId, pitId, GameDto.class);
+        assertEquals(200, game.getStatusCode().value());
+        assertNotNull(game.getBody());
+        assertEquals(gameId, game.getBody().getId());
+
+        return game.getBody();
+    }
+
+    private ErrorModel makeAMoveExpectError(Long gameId, Long pitId, int expectedErrorCode, String expectedStatus, String expectedMessage) {
+        ResponseEntity<ErrorModel> errorModel = callPutAPI(gameId, pitId, ErrorModel.class);
+        assertEquals(expectedErrorCode, errorModel.getStatusCode().value());
+        assertNotNull(errorModel.getBody());
+        assertEquals(expectedStatus, errorModel.getBody().getStatus());
+        assertEquals(expectedMessage, errorModel.getBody().getError());
+        return errorModel.getBody();
+    }
+
+    private <T> ResponseEntity<T> callPutAPI(Long gameId, Long pitId, Class<T> entityType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("pit_id", pitId.toString());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        return restTemplate.exchange(gameURL() + "/{id}", HttpMethod.PUT, request, entityType
+                , gameId);
+    }
+
+    private String gameURL() {
+        return "http://localhost:"+port+"/api/v1/game";
     }
 
     private void checkBoardIntegrity(Game game) {

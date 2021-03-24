@@ -1,6 +1,5 @@
 package com.praveen.mancala.config;
 
-import com.praveen.mancala.model.CustomPitSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -12,11 +11,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 @Configuration
 public class AppConfig {
-
-    @Bean
-    public CustomPitSerializer customPitSerializer() {
-        return new CustomPitSerializer();
-    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -38,6 +32,5 @@ public class AppConfig {
         docket.useDefaultResponseMessages(false);
         return docket;
     }
-
 
 }

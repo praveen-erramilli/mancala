@@ -19,7 +19,6 @@ public class Pit {
     private int coinsCount;
 
     @OneToOne
-    @JsonSerialize(using = CustomPitSerializer.class)
     private Pit next;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -28,7 +27,6 @@ public class Pit {
     private int playerNumber;
 
     @OneToOne
-    @JsonSerialize(using = CustomPitSerializer.class)
     private Pit opposite;
 
     @ManyToOne

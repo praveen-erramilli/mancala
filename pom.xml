@@ -35,6 +35,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
@@ -117,6 +122,7 @@
 										<exclude>com.praveen.mancala.exception.*</exclude>
 										<exclude>com.praveen.mancala.MancalaApplication</exclude>
 										<exclude>com.praveen.mancala.model.ErrorModel</exclude>
+										<exclude>com.praveen.mancala.payload.*</exclude>
 									</excludes>
 									<limits>
 										<limit>

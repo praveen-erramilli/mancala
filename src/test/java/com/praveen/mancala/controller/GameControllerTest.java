@@ -60,7 +60,7 @@ class GameControllerTest {
                .thenReturn(Game.builder().id(234L).gameStatus(GameStatus.IN_PROGRESS).build());
 
         mockMvc.perform(post("/api/v1/game"))
-               .andExpect(status().is(200))
+               .andExpect(status().is(201))
                .andExpect(jsonPath("$.id", Matchers.is(234)))
                .andExpect(jsonPath("$.gameStatus", Matchers.is(GameStatus.IN_PROGRESS.name())))
                .andExpect(jsonPath("$.winner", Matchers.nullValue()))
